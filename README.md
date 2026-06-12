@@ -113,11 +113,6 @@ Contributions, suggestions, and improvements are welcome.
 
 Feel free to fork the repository and experiment with new games, mechanics, or interface improvements.
 
----
-
-## License
-
-This project is distributed under the MIT License.
 
 ---
 
