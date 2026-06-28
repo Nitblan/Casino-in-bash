@@ -1,17 +1,16 @@
-##!/bin/bash
+# !/bin/bash
 export DIALOGRC="$(dirname "$0")/dialogrc_mono"export DIALOGRC="$(dirname "$0")/dialogrc_mono"export DIALOGRC="$(dirname "$0")/dialogrc_mono"export DIALOGRC="$(dirname "$0")/dialogrc_mono"export DIALOGRC="$(dirname "$0")/dialogrc_mono"export DIALOGRC="$(dirname "$0")/dialogrc_mono"export DIALOGRC="$(dirname "$0")/dialogrc_mono"export DIALOGRC="$(dirname "$0")/dialogrc_mono"export DIALOGRC="$(dirname "$0")/dialogrc_mono"
-# ============================================================
-#  Ruleta GUI — Martingala / Inverse Labouchere
-#  Requiere: dialog  (sudo apt install dialog)
-# ============================================================
 
-# ── Colores de terminal (mensajes fuera de dialog) ──────────
+
+
 green="\e[0;32m\033[1m";  end="\033[0m\e[0m"
 red="\e[0;31m\033[1m";    yellow="\e[0;33m\033[1m"
 blue="\e[0;34m\033[1m";   purple="\e[0;35m\033[1m"
 turquoise="\e[0;36m\033[1m"; gray="\e[0;37m\033[1m"
 
-# ── Ctrl-C limpio ────────────────────────────────────────────
+
+
+# Ctrl-C limpio
 function ctrl_c(){
   clear
   echo -e "\n${red}[!] Saliendo...${end}"
@@ -19,7 +18,11 @@ function ctrl_c(){
 }
 trap ctrl_c INT
 
-# ── Verificar dialog ─────────────────────────────────────────
+
+
+
+
+# Verificar dialog 
 if ! command -v dialog &>/dev/null; then
   echo -e "${red}[!] 'dialog' no está instalado.${end}"
   echo -e "${yellow}    sudo apt install dialog${end}"
@@ -29,9 +32,7 @@ fi
 DIALOG_OK=0
 BACKTITLE="🎰  Simulador de Ruleta"
 
-# ════════════════════════════════════════════════════════════
-#  MENÚ PRINCIPAL
-# ════════════════════════════════════════════════════════════
+#  Menu principal
 function main_menu(){
   while true; do
     CHOICE=$(dialog --clear \
@@ -53,9 +54,7 @@ function main_menu(){
   done
 }
 
-# ════════════════════════════════════════════════════════════
-#  PANTALLA DE AYUDA
-# ════════════════════════════════════════════════════════════
+# Helpm panel
 function show_help(){
   dialog --backtitle "$BACKTITLE" \
     --title "[ ESTRATEGIAS ]" \
@@ -78,13 +77,11 @@ el tope de ganancias fijado." \
     20 55
 }
 
-# ════════════════════════════════════════════════════════════
-#  CONFIGURACIÓN ANTES DE JUGAR
-# ════════════════════════════════════════════════════════════
+                                                                        #  antes de jugar
 function setup_game(){
   local TECHNIQUE=$1
 
-  # ── Dinero inicial ───────────────────────────────────────
+  # Dinero inicial
   MONEY=$(dialog --backtitle "$BACKTITLE" \
     --title "[ CONFIGURACIÓN ]" \
     --inputbox "¿Con cuánto dinero quieres jugar? ($)" \
@@ -92,11 +89,12 @@ function setup_game(){
     3>&1 1>&2 2>&3) || return
 
   if ! [[ "$MONEY" =~ ^[0-9]+$ ]] || [ "$MONEY" -le 0 ]; then
-    dialog --msgbox "⚠️  Introduce un número entero positivo." 6 40
+    dialog --msgbox "Introduce un número entero positivo." 6 40
     return
   fi
 
-  # ── Par o impar ─────────────────────────────────────────
+
+                                                                                      # par o impar?
   EVEN_ODD=$(dialog --backtitle "$BACKTITLE" \
     --title "[ CONFIGURACIÓN ]" \
     --menu "¿En qué quieres apostar?" 10 40 2 \
@@ -104,7 +102,7 @@ function setup_game(){
     "odd"  "Impar" \
     3>&1 1>&2 2>&3) || return
 
-  # ── Apuesta inicial (solo Martingala) ───────────────────
+                                                                                 # Apuesta inicial (solo Martingala)
   if [ "$TECHNIQUE" == "Martingala" ]; then
     INITIAL_BET=$(dialog --backtitle "$BACKTITLE" \
       --title "[ CONFIGURACIÓN ]" \
@@ -113,12 +111,12 @@ function setup_game(){
       3>&1 1>&2 2>&3) || return
 
     if ! [[ "$INITIAL_BET" =~ ^[0-9]+$ ]] || [ "$INITIAL_BET" -le 0 ]; then
-      dialog --msgbox "⚠️  Introduce un número entero positivo." 6 40
+      dialog --msgbox "Introduce un número entero positivo." 6 40
       return
     fi
 
     if [ "$INITIAL_BET" -ge "$MONEY" ]; then
-      dialog --msgbox "⚠️  La apuesta no puede ser mayor o igual que tu dinero." 6 45
+      dialog --msgbox "La apuesta no puede ser mayor o igual que tu dinero." 6 45
       return
     fi
 
@@ -128,9 +126,12 @@ function setup_game(){
   fi
 }
 
-# ════════════════════════════════════════════════════════════
-#  JUEGO — MARTINGALA
-# ════════════════════════════════════════════════════════════
+
+
+
+
+
+                                                                                          #  Martingala
 function play_martingala(){
   local money=$MONEY
   local initial_bet=$INITIAL_BET
@@ -146,7 +147,7 @@ function play_martingala(){
     local result=""
     local win=false
 
-    # ── Evaluar resultado ──────────────────────────────────
+                                                                                      # resultado
     if [ "$EVEN_ODD" == "even" ]; then
       if [ "$rn" -eq 0 ]; then
         result="Salió 0 → pierdes"
@@ -175,17 +176,17 @@ function play_martingala(){
       initial_bet=$(( initial_bet * 2 ))
     fi
 
-    # ── ¿Sin dinero? ───────────────────────────────────────
+    # sin dinero 
     if [ "$money" -lt 0 ]; then
       tput cnorm
       dialog --backtitle "$BACKTITLE" \
         --title "[ GAME OVER ]" \
-        --msgbox "💸 ¡Te quedaste sin dinero!\n\nJugadas totales: $play_counter\n\n$log" \
+        --msgbox "¡Te quedaste sin dinero!\n\nJugadas totales: $play_counter\n\n$log" \
         10 50
       return
     fi
 
-    # ── Mostrar estado y preguntar si continuar ─────────────
+    # Mostrar estado y preguntar si continuar 
     dialog --backtitle "$BACKTITLE" \
       --title "[ MARTINGALA — Jugada $play_counter ]" \
       --yesno \
@@ -199,23 +200,21 @@ Saldo actual:    \$$money\n\n\
       tput cnorm
       dialog --backtitle "$BACKTITLE" \
         --title "[ RESUMEN ]" \
-        --msgbox "Terminaste con \$$money 💰\nJugadas: $play_counter" \
+        --msgbox "Terminaste con \$$money \nJugadas: $play_counter" \
         8 40
       return
     fi
   done
 }
 
-# ════════════════════════════════════════════════════════════
-#  JUEGO — INVERSE LABOUCHERE
-# ════════════════════════════════════════════════════════════
+                                                                  # Inverse Labouchere
 function play_labouchere(){
   local money=$MONEY
   local -a seq=(1 2 3 4)
   local play_counter=0
   local bet_to_renew=$(( money + 50 ))
 
-  # Calcula apuesta desde la secuencia
+                                                                # calcular apuestas para sec
   function calc_bet(){
     if [ "${#seq[@]}" -ge 2 ]; then
       echo $(( seq[0] + seq[-1] ))
@@ -236,7 +235,7 @@ function play_labouchere(){
     local result=""
     local win=false
 
-    # ── Evaluar resultado ──────────────────────────────────
+                                                                      #  que salio
     if [ "$EVEN_ODD" == "even" ]; then
       if [ "$rn" -ne 0 ] && [ $(( rn % 2 )) -eq 0 ]; then
         result="Salió $rn (PAR) → ¡GANAS!"
@@ -253,7 +252,7 @@ function play_labouchere(){
       fi
     fi
 
-    # ── Actualizar secuencia ───────────────────────────────
+    # Actualizar secuencia 
     if $win; then
       local reward=$(( bet * 2 ))
       money=$(( money + reward ))
@@ -278,17 +277,17 @@ function play_labouchere(){
     local seq_str="[${seq[*]}]"
     local next_bet=$(calc_bet)
 
-    # ── ¿Sin dinero? ───────────────────────────────────────
+    # Sin dinero 
     if [ "$money" -lt 0 ]; then
       tput cnorm
       dialog --backtitle "$BACKTITLE" \
         --title "[ GAME OVER ]" \
-        --msgbox "💸 ¡Te quedaste sin dinero!\n\nJugadas totales: $play_counter\n$result" \
+        --msgbox " Te has quedado sin pasta cabron, que no ves que la casa siempre gana?\n\nJugadas totales: $play_counter\n$result" \
         10 50
       return
     fi
-
-    # ── Mostrar estado ─────────────────────────────────────
+    
+    # estado
     dialog --backtitle "$BACKTITLE" \
       --title "[ LABOUCHERE — Jugada $play_counter ]" \
       --yesno \
@@ -297,22 +296,19 @@ Saldo:       \$$money\n\
 Secuencia:   $seq_str\n\
 Prox. apuesta: \$$next_bet\n\
 Tope renovación: \$$bet_to_renew\n\n\
-¿Seguir jugando?" \
+Seguir jugando?" \
       13 55
 
     if [ $? -ne 0 ]; then
       tput cnorm
       dialog --backtitle "$BACKTITLE" \
         --title "[ RESUMEN ]" \
-        --msgbox "Terminaste con \$$money 💰\nJugadas: $play_counter" \
+        --msgbox "Terminaste con \$$money \nJugadas: $play_counter" \
         8 40
       return
     fi
   done
 }
 
-# ════════════════════════════════════════════════════════════
-#  ENTRADA
-# ════════════════════════════════════════════════════════════
 clear
 main_menu !/bin/bash
