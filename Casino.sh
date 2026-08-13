@@ -17,7 +17,7 @@ function crtl_c(){
   tput cnorm
 }
 # crtl_c 
-trap crtl_c INT
+trap crtl_c SIGINT
 
 function help_panel(){
   echo -e "\n${yellow}[+] ${end}${gray}Usages:${end}"
